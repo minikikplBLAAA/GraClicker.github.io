@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker Gra</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Gra Clicker</h1>
+    <div id="counter">0</div>
+    <button class="btn" onclick="increaseScore()">Kliknij mnie!</button>
+    <br><br>    
+    <button class="btn" onclick="openShop()">Sklep</button>
+    
+    <div id="shop" style="display: none;">
+        <h2>Sklep z ulepszeniami</h2>
+        <button class="btn" onclick="buyUpgrade(1)" id="upgrade1-btn">Kup ulepszenie (+1 pkt/klik) - 10 pkt</button>
+        <button class="btn" onclick="buyUpgrade(2)" id="upgrade2-btn">Kup super-click (+15 pkt/klik) - 1000 pkt</button>
+        <button class="btn" onclick="buyUpgrade(3)" id="upgrade3-btn">Kup auto-clicker (+1 pkt/sec) - 100 pkt</button>
+        <button class="btn" onclick="buyUpgrade(4)" id="upgrade4-btn">Kup turbo auto-clicker (+10 pkt/sec) - 2000 pkt</button>
+        <button class="btn" onclick="buyUpgrade(5)" id="upgrade5-btn">Zmiana tła na czarne - 750 pkt</button>
+        <button class="btn" onclick="buyUpgrade(6)" id="upgrade6-btn" style="display: none;">Odblokuj tryb nocny (Efekty wizualne) - 1500 pkt</button>
+        <br><br>
+        <button class="btn" onclick="closeShop()">Zamknij sklep</button>
+    </div>
+    
+    <script src="script.js"></script>
+    <button class="btn" id="kody-btn" onclick="openCodeInput()">KODY</button>
+    
+    <div id="code-input" style="display: none;">
+        <input type="text" id="code" placeholder="Wpisz kod">
+        <button class="btn" onclick="validateCode()">Zatwierdź</button>
+    </div>
+    
+    <div id="word-input" style="display: none;">
+        <input type="text" id="words" placeholder="Wpisz słowa">
+        <button class="btn" onclick="playAudio()">Odtwórz</button>
+    </div>
+</body>
+</html>

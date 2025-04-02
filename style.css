@@ -1,0 +1,54 @@
+/* Existing styles... */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    margin: 50px;
+}
+
+#counter {
+    font-size: 2em;
+    margin: 20px;
+}
+
+.btn {
+    padding: 15px 30px;
+    font-size: 1.5em;
+    cursor: pointer;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background-color: #45a049;
+}
+
+/* Styles for KODY button and input fields */
+#kody-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 5px 10px; /* Reduced padding */
+    font-size: 1em; /* Reduced font size */
+    background-color: #4CAF50; /* Green */
+}
+
+#code-input, #word-input {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    display: none; /* Hidden by default */
+}
+
+#code-input input, #word-input input {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 200px;
+}
