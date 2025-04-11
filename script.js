@@ -52,7 +52,7 @@ function saveUsername() {
         // Show game UI after nickname is set
         document.getElementById("user-info").style.display = "flex";
         document.getElementById("counter").style.display = "block";
-        document.getElementById("scoreboard-toggle").style.display = "inline-block";
+        document.getElementById("scoreboard-toggle-btn").style.display = "inline-block";
     }
 }
 
@@ -346,7 +346,10 @@ async function playAudio() {
 
 function toggleScoreboard() {
     const scoreboardContainer = document.getElementById("scoreboard-container");
-    const toggleButton = document.getElementById("scoreboard-toggle");
+    const toggleButton = document.getElementById("scoreboard-toggle-btn");
+    
+    console.log("Toggling scoreboard. Current state:", scoreboardContainer.style.display);
+    console.log("Toggle button found:", toggleButton);
     
     if (scoreboardContainer.style.display === "none") {
         scoreboardContainer.style.display = "block";
