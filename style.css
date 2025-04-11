@@ -1,4 +1,4 @@
-/* Base Styles */
+     /* Base Styles */
 body {
     font-family: 'Arial', sans-serif;
     text-align: center;
@@ -127,4 +127,109 @@ body {
 #win-screen .btn {
     margin-top: 1rem;
     background-color: #4CAF50;
+}
+
+/* Start Menu */
+#start-menu {
+    text-align: center;
+    margin: 50px auto;
+}
+
+#start-menu .btn {
+    font-size: 20px;
+    padding: 10px 20px;
+    margin: 10px auto;
+}
+
+/* Username and Scoreboard Styles */
+#user-info {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    display: none; /* Hidden by default until nickname is set */
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Counter */
+#counter {
+    display: none; /* Hidden by default until nickname is set */
+}
+
+/* Scoreboard Toggle Button */
+.scoreboard-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    display: none; /* Hidden by default until nickname is set */
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+}
+
+#username-display {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+#username-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    width: 80%;
+    max-width: 400px;
+}
+
+#username-modal h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+#username-input {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    margin: 1rem 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#scoreboard-container {
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background-color: #f8f8f8;
+    border-radius: 10px;
+    max-width: 500px;
+}
+
+#scoreboard-container h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+#scoreboard {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#scoreboard li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}
+
+#scoreboard li:last-child {
+    border-bottom: none;
 }

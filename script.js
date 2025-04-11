@@ -1,5 +1,7 @@
 let score = 0;
 let pointsPerClick = 1;
+let username = localStorage.getItem('username') || "Gracz";
+const scoreboard = JSON.parse(localStorage.getItem('scoreboard')) || [];
 let autoClicker = 0;
 let goldenClick = false;
 let backgroundChanged = false;
@@ -21,6 +23,95 @@ function increaseScore() {
     score += goldenClick ? pointsPerClick * 2 : pointsPerClick;
     updateUI();
     checkWin();
+    saveGame();
+}
+
+function startGame() {
+    document.getElementById("click-button").style.display = "inline-block";
+    document.getElementById("shop-button").style.display = "inline-block";
+    showNicknameMenu();
+}
+
+function showNicknameMenu() {
+    // Show nickname input modal
+    document.getElementById("username-input").value = username;
+    toggleElement("username-modal", true);
+    
+    // Hide start menu
+    document.getElementById("start-menu").style.display = "none";
+}
+
+function saveUsername() {
+    const newUsername = document.getElementById("username-input").value.trim();
+    if (newUsername) {
+        username = newUsername;
+        document.getElementById("username-display").textContent = username;
+        toggleElement("username-modal", false);
+        localStorage.setItem('username', username);
+        
+        // Show game UI after nickname is set
+        document.getElementById("user-info").style.display = "flex";
+        document.getElementById("counter").style.display = "block";
+        document.getElementById("scoreboard-toggle").style.display = "inline-block";
+    }
+}
+
+function updateScoreboard() {
+    const scoreboardList = document.getElementById("scoreboard");
+    scoreboardList.innerHTML = '';
+    
+    // Add current player to scoreboard if not already there
+    const playerIndex = scoreboard.findIndex(entry => entry.username === username);
+    if (playerIndex === -1) {
+        scoreboard.push({username, score});
+    } else if (score > scoreboard[playerIndex].score) {
+        scoreboard[playerIndex].score = score;
+    }
+    
+    // Sort by score descending and take top 5
+    const topScores = [...scoreboard].sort((a, b) => b.score - a.score).slice(0, 5);
+    
+    // Display scores
+    topScores.forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.username}: ${entry.score}`;
+        scoreboardList.appendChild(li);
+    });
+    
+    localStorage.setItem('scoreboard', JSON.stringify(scoreboard));
+}
+
+let purchasedUpgrades = JSON.parse(localStorage.getItem('purchasedUpgrades')) || [];
+
+function saveGame() {
+    localStorage.setItem('gameState', JSON.stringify({
+        score,
+        pointsPerClick,
+        autoClicker,
+        goldenClick,
+        backgroundChanged,
+        username
+    }));
+    localStorage.setItem('purchasedUpgrades', JSON.stringify(purchasedUpgrades));
+    updateScoreboard();
+}
+
+function loadGame() {
+    const saved = JSON.parse(localStorage.getItem('gameState'));
+    purchasedUpgrades = JSON.parse(localStorage.getItem('purchasedUpgrades')) || [];
+    
+    if (saved) {
+        score = saved.score || 0;
+        pointsPerClick = saved.pointsPerClick || 1;
+        autoClicker = saved.autoClicker || 0;
+        goldenClick = saved.goldenClick || false;
+        backgroundChanged = saved.backgroundChanged || false;
+        username = saved.username || "Gracz";
+        
+        document.getElementById("username-display").textContent = username;
+        updateUI();
+        updateScoreboard();
+    }
 }
 
 function buyUpgrade(upgradeId) {
@@ -34,9 +125,10 @@ function buyUpgrade(upgradeId) {
         } else if (upgrades[upgradeId].action) {
             handleSpecialUpgrade(upgrades[upgradeId].action, upgradeId);
         }
-
+        
         upgrades[upgradeId].cost *= 2;
         updateUI();
+        saveGame();
     }
 }
 
@@ -74,10 +166,25 @@ function toggleElement(id, show) {
 
 function updateUI() {
     document.getElementById("counter").innerText = score;
-    for (let i = 1; i <= 7; i++) { // Updated to include new upgrade
+    document.getElementById("username-display").textContent = username;
+    for (let i = 1; i <= 7; i++) {
         const btn = document.getElementById(`upgrade${i}-btn`);
-        if (btn && (upgrades[i].bonus || upgrades[i].auto)) {
-            btn.innerText = `Kup ulepszenie (+${upgrades[i].bonus || upgrades[i].auto} ${upgrades[i].bonus ? "pkt/klik" : "pkt/sec"}) - ${upgrades[i].cost} pkt`;
+        if (btn) {
+            btn.style.backgroundColor = "";
+            btn.style.color = "";
+            
+            if (upgrades[i].bonus) {
+                btn.innerText = `Kup ulepszenie (+${upgrades[i].bonus} pkt/klik) - ${upgrades[i].cost} pkt`;
+            } else if (upgrades[i].auto) {
+                btn.innerText = `Kup ulepszenie (+${upgrades[i].auto} pkt/sec) - ${upgrades[i].cost} pkt`;
+            } else if (upgrades[i].action) {
+                // Special action upgrades
+                let actionText = "";
+                if (i === 5) actionText = "Zmiana tła na czarne";
+                else if (i === 6) actionText = "Tryb nocny";
+                else if (i === 7) actionText = "Efekty wizualne";
+                btn.innerText = `${actionText} - ${upgrades[i].cost} pkt`;
+            }
         }
     }
 }
@@ -95,6 +202,26 @@ function restartGame() {
     autoClicker = 0;
     goldenClick = false;
     backgroundChanged = false;
+    purchasedUpgrades = [];
+
+    // Reset upgrade costs
+    for (let i = 1; i <= 7; i++) {
+        if (upgrades[i].cost) {
+            const baseCost = i === 1 ? 10 : 
+                           i === 2 ? 1000 : 
+                           i === 3 ? 100 : 
+                           i === 4 ? 2000 : 
+                           i === 5 ? 750 : 
+                           i === 6 ? 1500 : 1000;
+            upgrades[i].cost = baseCost;
+        }
+    }
+
+    // Reset scoreboard for current player
+    const playerIndex = scoreboard.findIndex(entry => entry.username === username);
+    if (playerIndex !== -1) {
+        scoreboard[playerIndex].score = 0;
+    }
 
     document.body.style.backgroundColor = "";
     document.body.style.color = "";
@@ -106,6 +233,8 @@ function restartGame() {
     toggleElement("upgrade6-btn", false);
 
     updateUI();
+    saveGame();
+    console.log("Zresetowano grę i wyniki w tabeli wyników");
 }
 
 function openShop() {
@@ -215,23 +344,51 @@ async function playAudio() {
     }
 }
 
-function toggleCodeInput() {
-    const button = document.getElementById("kody-btn");
-    const inputContainer = document.querySelector(".kody-input-container");
+function toggleScoreboard() {
+    const scoreboardContainer = document.getElementById("scoreboard-container");
+    const toggleButton = document.getElementById("scoreboard-toggle");
     
-    // If input is already open, close it
-    if (inputContainer.style.display === "block") {
-        closeCodeInput();
-        return;
+    if (scoreboardContainer.style.display === "none") {
+        scoreboardContainer.style.display = "block";
+        toggleButton.textContent = "Ukryj tabelę wyników";
+    } else {
+        scoreboardContainer.style.display = "none";
+        toggleButton.textContent = "Pokaż tabelę wyników";
     }
-
-    // Open the input window
-    openCodeInput();
-    isCodeInputOpen = true;
 }
+
+// Expose reset function to console
+window.resetUpgrades = function() {
+    purchasedUpgrades = [];
+    for (let i = 1; i <= 7; i++) {
+        if (upgrades[i].cost) {
+            const baseCost = i === 1 ? 10 : 
+                           i === 2 ? 1000 : 
+                           i === 3 ? 100 : 
+                           i === 4 ? 2000 : 
+                           i === 5 ? 750 : 
+                           i === 6 ? 1500 : 1000;
+            upgrades[i].cost = baseCost;
+        }
+    }
+    updateUI();
+    saveGame();
+    console.log("Zresetowano wszystkie zakupione ulepszenia");
+};
+
+// Load saved game on startup
+window.addEventListener('DOMContentLoaded', () => {
+    loadGame();
+});
+
+// Save game when page is closing
+window.addEventListener('beforeunload', () => {
+    saveGame();
+});
 
 setInterval(() => {
     score += autoClicker;
     updateUI();
     checkWin();
+    saveGame();
 }, 1000);

@@ -10,10 +10,26 @@
 </head>
 <body>
     <h1>Gra Clicker</h1>
+    <div id="start-menu">
+        <button class="btn" onclick="startGame()" style="font-size: 24px; padding: 15px 30px;">Graj</button>
+    </div>
+    <div id="user-info" style="display: none;">
+        <span id="username-display">Gracz</span>
+    </div>
     <div id="counter">0</div>
-    <button class="btn" onclick="increaseScore()">Kliknij mnie!</button>
+    <button id="scoreboard-toggle" class="btn scoreboard-toggle" onclick="toggleScoreboard()">Pokaż tabelę wyników</button>
+    <div id="scoreboard-container" style="display: none;">
+        <h3>Najlepsze wyniki:</h3>
+        <ol id="scoreboard"></ol>
+    </div>
+    <div id="username-modal" style="display: none;">
+        <h3>Wprowadź swoją nazwę</h3>
+        <input type="text" id="username-input" maxlength="20">
+        <button class="btn" onclick="saveUsername()">Zapisz</button>
+    </div>
+    <button class="btn" onclick="increaseScore()" id="click-button" style="display: none;">Kliknij mnie!</button>
     <br><br>    
-    <button class="btn" onclick="openShop()">Sklep</button>
+    <button class="btn" onclick="openShop()" id="shop-button" style="display: none;">Sklep</button>
     
     <div id="shop" style="display: none;">
         <h2>Sklep z ulepszeniami</h2>
@@ -47,7 +63,7 @@
     <div id="footer-container">
         <footer id="game-footer">
             <span id="creator">Minikik</span>
-            <span id="version">v0.2.0 ALPHA</span>
+            <span id="version">v0.2.3 ALPHA</span>
         </footer>
     </div>
 </body>
