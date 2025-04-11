@@ -1,7 +1,23 @@
+// Initialize Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDVTgD9_pWSIAVqfEdySbRQlHmLEHzt_Ds",
+    authDomain: "graclicker.firebaseapp.com",
+    databaseURL: "https://graclicker-default-rtdb.firebaseio.com",
+    projectId: "graclicker",
+    storageBucket: "graclicker.appspot.com",
+    messagingSenderId: "411839707177",
+    appId: "1:411839707177:web:de4d94b64e74d0729d0438",
+    measurementId: "G-YMKEN3N97X"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 let score = 0;
 let pointsPerClick = 1;
 let username = localStorage.getItem('username') || "Gracz";
-const scoreboard = JSON.parse(localStorage.getItem('scoreboard')) || [];
+let scoreboard = [];
 let autoClicker = 0;
 let goldenClick = false;
 let backgroundChanged = false;
@@ -56,29 +72,37 @@ function saveUsername() {
     }
 }
 
-function updateScoreboard() {
+async function updateScoreboard() {
     const scoreboardList = document.getElementById("scoreboard");
     scoreboardList.innerHTML = '';
-    
-    // Add current player to scoreboard if not already there
-    const playerIndex = scoreboard.findIndex(entry => entry.username === username);
-    if (playerIndex === -1) {
-        scoreboard.push({username, score});
-    } else if (score > scoreboard[playerIndex].score) {
-        scoreboard[playerIndex].score = score;
+
+    try {
+        // Save current score to Firebase
+        if (username && username !== "Gracz") {
+            await database.ref('scores/' + username).set({
+                username: username,
+                score: score
+            });
+        }
+
+        // Load and display scores from Firebase
+        database.ref('scores').orderByChild('score').limitToLast(5).on('value', (snapshot) => {
+            const scores = [];
+            snapshot.forEach(childSnapshot => {
+                scores.push(childSnapshot.val());
+            });
+            
+            // Display top 5 scores (sorted high to low)
+            scores.sort((a, b) => b.score - a.score).forEach(entry => {
+                const li = document.createElement('li');
+                li.textContent = `${entry.username}: ${entry.score}`;
+                scoreboardList.appendChild(li);
+            });
+        });
+    } catch (error) {
+        console.error("Error updating scoreboard:", error);
+        scoreboardList.innerHTML = '<li>Error loading scores</li>';
     }
-    
-    // Sort by score descending and take top 5
-    const topScores = [...scoreboard].sort((a, b) => b.score - a.score).slice(0, 5);
-    
-    // Display scores
-    topScores.forEach(entry => {
-        const li = document.createElement('li');
-        li.textContent = `${entry.username}: ${entry.score}`;
-        scoreboardList.appendChild(li);
-    });
-    
-    localStorage.setItem('scoreboard', JSON.stringify(scoreboard));
 }
 
 let purchasedUpgrades = JSON.parse(localStorage.getItem('purchasedUpgrades')) || [];
