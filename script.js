@@ -3,6 +3,8 @@ let pointsPerClick = 1;
 let autoClicker = 0;
 let goldenClick = false;
 let backgroundChanged = false;
+let isCodeInputOpen = false;
+let kodyClickCount = 0; // Counter for KODY button clicks
 const winThreshold = 100000;
 
 const upgrades = {
@@ -11,7 +13,8 @@ const upgrades = {
     3: { cost: 100, auto: 1 },
     4: { cost: 2000, auto: 10 },
     5: { cost: 750, action: "changeBackground" },
-    6: { cost: 1500, action: "enableNightMode", hidden: true }
+    6: { cost: 1500, action: "enableNightMode", hidden: true },
+    7: { cost: 1000, action: "enhancedVisuals" } // New upgrade for enhanced visuals
 };
 
 function increaseScore() {
@@ -47,7 +50,21 @@ function handleSpecialUpgrade(action, upgradeId) {
     } else if (action === "enableNightMode") {
         document.body.style.transition = "background 0.5s ease, color 0.5s ease";
         document.body.style.textShadow = "0 0 10px white";
+    } else if (action === "enhancedVisuals") {
+        // New visual effects logic
+        document.body.style.transition = "background 0.5s ease, color 0.5s ease";
+        document.body.style.textShadow = "0 0 10px white";
+        // Trigger particle effects
+        triggerParticleEffects();
     }
+}
+
+function triggerParticleEffects() {
+    // Logic for particle effects on button click
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'particle-container';
+    document.body.appendChild(particleContainer);
+    // Add particle effect logic here
 }
 
 function toggleElement(id, show) {
@@ -57,7 +74,7 @@ function toggleElement(id, show) {
 
 function updateUI() {
     document.getElementById("counter").innerText = score;
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) { // Updated to include new upgrade
         const btn = document.getElementById(`upgrade${i}-btn`);
         if (btn && (upgrades[i].bonus || upgrades[i].auto)) {
             btn.innerText = `Kup ulepszenie (+${upgrades[i].bonus || upgrades[i].auto} ${upgrades[i].bonus ? "pkt/klik" : "pkt/sec"}) - ${upgrades[i].cost} pkt`;
@@ -109,12 +126,45 @@ function closeCodeInput() {
 
 function validateCode() {
     const code = document.getElementById("code").value;
+    const button = document.getElementById("kody-button");
+    
     if (code === "Military") {
+        console.log("Valid code entered - closing inputs");
         toggleElement("word-input", true);
         toggleElement("code-input", false);
-    } else {
+        isCodeInputOpen = false;
+        button.disabled = true;
+        console.log("Button disabled after valid code");
+    } 
+    else if (code === "debugWin") {
+        console.log("DebugWin code entered - starting process");
+        score = winThreshold;
+        console.log("Score set to:", score);
+        updateUI();
+        
+        console.log("Checking win-screen element:", document.getElementById("win-screen"));
+        console.log("Current win-screen display:", document.getElementById("win-screen").style.display);
+        
+        toggleElement("shop", false);
+        toggleElement("win-screen", true);
+        toggleElement("code-input", false);
+        isCodeInputOpen = false;
+        
+        console.log("After toggle - win-screen display:", document.getElementById("win-screen").style.display);
+        console.log("Debug win fully processed");
+    }
+    else if (code === "EzWin") {
+        console.log("EzWin code entered - adding 10000 points");
+        score += 10000;
+        updateUI();
+        toggleElement("code-input", false);
+        isCodeInputOpen = false;
+        console.log("Added 10000 points, new score:", score);
+    }
+    else {
         alert("Nieprawidłowy kod!");
     }
+    console.log(`Current state after validation - isCodeInputOpen: ${isCodeInputOpen}, button disabled: ${button.disabled}`);
 }
 
 function delay(ms) {
@@ -122,7 +172,7 @@ function delay(ms) {
 }
 
 async function playAudio() {
-    const words = document.getElementById("words").value.trim();
+    const words = document.getElementById("words").value.trim().toLowerCase();
     if (!words) {
         console.log("No words entered.");
         return;
@@ -130,31 +180,33 @@ async function playAudio() {
     
     // Split by spaces and remove punctuation
     const wordArray = words.split(' ').map(word => word.replace(/[.,!?]/g, '').trim());
-    const folders = ["military/military1", "military/military2", "military/military3"];
+    const folders = ["military/military/military1", "military/military/military2", "military/military/military3"];
     
     for (let word of wordArray) {
         let found = false;
         for (let folder of folders) {
-            const audioFilePath = `secretcodes/military/${folder}/${word}.wav`;
+            const audioFilePath = `./secretcodes/${folder}/${word}.wav`;
             
             try {
-                console.log(`Checking audio file: ${audioFilePath}`); // Debugging log
-                const response = await fetch(audioFilePath, { method: 'HEAD' });
-                console.log(`Response status for ${audioFilePath}: ${response.status}`); // Debugging log
-                console.log(`Audio file path constructed: ${audioFilePath}`); // Additional debugging log
-                if (response.ok) {
-                    const audio = new Audio(audioFilePath);
-                    audio.play().then(() => {
-                        console.log("Audio is playing successfully from:", audioFilePath);
-                    }).catch(error => {
-                        console.error("Error playing audio:", error);
-                    });
-                    found = true;
-                    await delay(1000); // Wait for 1 second before playing the next audio
-                    break; // Move to the next word after starting playback
-                }
+                console.log(`Checking audio file: ${audioFilePath}`);
+                const audio = new Audio(audioFilePath);
+                
+                // Check if audio can be played
+                await new Promise((resolve, reject) => {
+                    audio.addEventListener('canplaythrough', resolve);
+                    audio.addEventListener('error', reject);
+                });
+                
+                // Play the audio
+                await audio.play();
+                console.log("Audio is playing successfully from:", audioFilePath);
+                found = true;
+                await delay(audio.duration * 1000); // Wait for audio to finish
+                break;
+                
             } catch (error) {
-                console.error("Error checking audio file in", folder, error);
+                console.error(`Error with audio file ${audioFilePath}:`, error);
+                continue; // Try next folder
             }
         }
         if (!found) {
@@ -163,20 +215,19 @@ async function playAudio() {
     }
 }
 
-async function toggleCodeInput() {
-    const codeInputElement = document.getElementById("code-input");
-    const button = document.getElementById("kody-button"); // Assuming the button has this ID
-
-    if (codeInputElement.style.display === "none" || codeInputElement.style.display === "") {
-        button.disabled = true; // Disable the button to prevent spamming
-        closeCodeInput(); // Close any open input before opening a new one
-        await delay(500); // Wait for half a second before re-enabling the button
-        openCodeInput();
-    } else {
+function toggleCodeInput() {
+    const button = document.getElementById("kody-btn");
+    const inputContainer = document.querySelector(".kody-input-container");
+    
+    // If input is already open, close it
+    if (inputContainer.style.display === "block") {
         closeCodeInput();
+        return;
     }
 
-    button.disabled = false; // Re-enable the button
+    // Open the input window
+    openCodeInput();
+    isCodeInputOpen = true;
 }
 
 setInterval(() => {
