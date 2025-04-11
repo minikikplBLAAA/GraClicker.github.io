@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clicker Gra</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="footer.css">
-    <script src="version.js"></script>
+    <script>
+        window.baseURL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '' : '/GraClicker.github.io/';
+        document.write(`
+            <link rel="stylesheet" href="${baseURL}style.css">
+            <link rel="stylesheet" href="${baseURL}footer.css">
+            <script src="${baseURL}version.js"><\/script>
+        `);
+    </script>
 </head>
 <body>
     <h1>Gra Clicker</h1>
@@ -17,7 +22,7 @@
         <span id="username-display">Gracz</span>
     </div>
     <div id="counter">0</div>
-    <button id="scoreboard-toggle" class="btn scoreboard-toggle" onclick="toggleScoreboard()">Pokaż tabelę wyników</button>
+    <button id="scoreboard-toggle-btn" class="btn scoreboard-toggle" onclick="toggleScoreboard()">Pokaż tabelę wyników</button>
     <div id="scoreboard-container" style="display: none;">
         <h3>Najlepsze wyniki:</h3>
         <ol id="scoreboard"></ol>
