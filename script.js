@@ -360,7 +360,12 @@ function toggleScoreboard() {
     }
 }
 
-// Expose reset function to console
+// Expose console commands
+window.Scoreboard = function() {
+    console.log("Showing scoreboard via console command");
+    toggleScoreboard();
+};
+
 window.resetUpgrades = function() {
     purchasedUpgrades = [];
     for (let i = 1; i <= 7; i++) {
